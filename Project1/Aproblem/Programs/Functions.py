@@ -48,3 +48,13 @@ def Plot_Franke(x, y, z, name):
     plt.savefig(figures_path / 'PDF' / name, format = 'pdf')
     plt.savefig(figures_path / 'PNG' / name)
     plt.show()
+
+def Optimal_coefs(X_train, z_train):
+    beta_OLS = np.linalg.pinv(X_train.T.dot(X_train)).dot(X_train.T).dot(z_train)
+
+    return beta_OLS
+
+def Prediction(X, beta):
+    z_OLS = X @ beta
+
+    return z_OLS
