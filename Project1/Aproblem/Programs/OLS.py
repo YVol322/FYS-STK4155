@@ -5,6 +5,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 from Functions import FrankeFunction, create_X
 from pathlib import Path
 
+
 np.random.seed(12)
 
 x = np.arange(0, 1, 0.05)
@@ -21,7 +22,7 @@ fit_degree = []
 current_path = Path.cwd().resolve()
 figures_path = current_path.parent / "Results"
 
-for degree in range(1,6):
+for degree in range(1,11):
     X = create_X(x,y, degree)
 
     z_train, z_test, X_train, X_test = train_test_split(z, X, test_size = 0.2)
@@ -38,21 +39,18 @@ for degree in range(1,6):
     fit_degree.append(degree)
 
 plt.figure(1)
+plt.style.use('ggplot')
+plt.subplot(2,1,1)
 plt.plot(fit_degree, train_MSE, label = 'Train MSE')
 plt.plot(fit_degree, test_MSE, label = 'Test MSE')
-plt.xlabel('Polynomial fit degree')
 plt.ylabel('MSE')
 plt.legend()
-plt.savefig(figures_path / "OLS_MSE_5_noise")
-plt.savefig(figures_path / "OLS_MSE_5_noise", format = "pdf")
-plt.show()
-
-plt.figure(2)
+plt.subplot(2,1,2)
 plt.plot(fit_degree, train_R2, label = 'Train r2 score')
 plt.plot(fit_degree, test_R2, label = 'Test r2 score')
-plt.savefig(figures_path / "OLS_R2_5_noise")
-plt.savefig(figures_path / "OLS_R2_5_noise", format = "pdf")
 plt.xlabel('Polynomial fit degree')
 plt.ylabel('R2 score')
 plt.legend()
+plt.savefig(figures_path / 'PNG' / "OLS_10")
+plt.savefig(figures_path / 'PDF' / "OLS_10", format = "pdf")
 plt.show()

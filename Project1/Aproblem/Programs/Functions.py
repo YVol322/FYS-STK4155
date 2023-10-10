@@ -45,6 +45,6 @@ def Plot_Franke(x, y, z, name):
 
     # Add a color bar which maps values to colors.
     fig.colorbar(surf, shrink=0.5, aspect=5)
-    plt.savefig(figures_path / name, format = 'pdf')
-    plt.savefig(figures_path / name)
+    plt.savefig(figures_path / 'PDF' / name, format = 'pdf')
+    plt.savefig(figures_path / 'PNG' / name)
     plt.show()
