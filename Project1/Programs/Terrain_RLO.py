@@ -38,8 +38,8 @@ train_R2_Lasso = []
 
 fit_degree = []
 
-#l = 0.01
-l = 1
+l = 0.01
+#l = 1
 maxdegree = 5
 
 for degree in range(1, maxdegree + 1):
@@ -47,7 +47,7 @@ for degree in range(1, maxdegree + 1):
 
     z_train, z_test, X_train, X_test = train_test_split(z, X, test_size = 0.2)
 
-    scaler = StandardScaler(with_std=False)
+    scaler = StandardScaler(with_std=True)
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.fit_transform(X_test)
     z_train = scaler.fit_transform(z_train)
@@ -119,8 +119,8 @@ for i in range(1, 4):
     plt.subplot(4, 1, i)
     plt.gca().set_xticks([])
 
-#plt.savefig(figures_path_PNG / 'Terrain_RLO_points20_lmb1e-2')
-#plt.savefig(figures_path_PDF / 'Terrain_RLO_points20_lmb1e-2', format = "pdf")
-plt.savefig(figures_path_PNG / 'RLO_points20_lmb1e1')
-plt.savefig(figures_path_PDF / 'RLO_points20_lmb1e1', format = "pdf")
+plt.savefig(figures_path_PNG / 'Terrain_RLO_points20_lmb1e-2')
+plt.savefig(figures_path_PDF / 'Terrain_RLO_points20_lmb1e-2', format = "pdf")
+#plt.savefig(figures_path_PNG / 'RLO_points20_lmb1e1')
+#plt.savefig(figures_path_PDF / 'RLO_points20_lmb1e1', format = "pdf")
 plt.show()

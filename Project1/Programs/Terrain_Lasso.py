@@ -18,8 +18,8 @@ figures_path_PNG, figures_path_PDF = Create_directory('Terrain_Lasso')
 
 terrain1 = imread(file_path)
 
-#N = 40
-N = 200
+N = 20
+#N = 200
 
 x,y,z = Terrain_Data(terrain1, N)
 
@@ -69,8 +69,8 @@ plt.xlabel('Penalty parameter')
 plt.xscale('log')
 plt.ylabel('R2 score')
 plt.legend()
-#plt.savefig(figures_path_PNG / 'Terrain_Lasso_points40')
-#plt.savefig(figures_path_PDF / 'Terrain_Lasso_points40', format = 'pdf')
-plt.savefig(figures_path_PNG / 'Terrain_Lasso_points200')
-plt.savefig(figures_path_PDF / 'Terrain_Lasso_points200', format = 'pdf')
+plt.savefig(figures_path_PNG / 'Terrain_Lasso_points20')
+plt.savefig(figures_path_PDF / 'Terrain_Lasso_points20', format = 'pdf')
+#plt.savefig(figures_path_PNG / 'Terrain_Lasso_points200')
+#plt.savefig(figures_path_PDF / 'Terrain_Lasso_points200', format = 'pdf')
 plt.show()

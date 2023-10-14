@@ -7,7 +7,7 @@ from sklearn.utils import resample
 from sklearn.model_selection import train_test_split
 from Functions import Create_directory, Terrain_Data, Create_X, Optimal_coefs_OLS, Prediction
 
-np.random.seed(1)
+np.random.seed(5)
 
 current_path = Path.cwd().resolve()
 file_path = current_path.parent / 'Data' / 'SRTM_data_Norway_2.tif'
@@ -19,7 +19,7 @@ N = 20
 
 x,y,z = Terrain_Data(terrain1, N)
 
-maxdegree = 16
+maxdegree = 14
 n_boostraps = 20
 
 polydegree = np.zeros(maxdegree)
@@ -36,7 +36,7 @@ for i in range(1, maxdegree+1, 1):
 
     X_train, X_test, z_train, z_test = train_test_split(X, z, test_size=0.2)
     
-    scaler = StandardScaler(with_std=False)
+    scaler = StandardScaler(with_std=True)
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.fit_transform(X_test)
     z_train = scaler.fit_transform(z_train)

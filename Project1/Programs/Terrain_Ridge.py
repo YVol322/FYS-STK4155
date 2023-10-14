@@ -16,7 +16,7 @@ figures_path_PNG, figures_path_PDF = Create_directory('Terrain_Ridge')
 
 terrain1 = imread(file_path)
 
-#N = 40
+#N = 20
 N = 200
 
 x,y,z = Terrain_Data(terrain1, N)
@@ -35,7 +35,7 @@ for lmbda in l:
 
     z_train, z_test, X_train, X_test = train_test_split(z, X, test_size = 0.2)
 
-    scaler = StandardScaler(with_std=False)
+    scaler = StandardScaler(with_std=True)
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.fit_transform(X_test)
     z_train = scaler.fit_transform(z_train)
@@ -67,8 +67,8 @@ plt.xlabel('Penalty parameter')
 plt.xscale('log')
 plt.ylabel('R2 score')
 plt.legend()
-#plt.savefig(figures_path_PNG / 'Terrain_Ridge_points40')
-#plt.savefig(figures_path_PDF / 'Terrain_Ridge_points40', format = 'pdf')
+#plt.savefig(figures_path_PNG / 'Terrain_Ridge_points20')
+#plt.savefig(figures_path_PDF / 'Terrain_Ridge_points20', format = 'pdf')
 plt.savefig(figures_path_PNG / 'Terrain_Ridge_points200')
 plt.savefig(figures_path_PDF / 'Terrain_Ridge_points200', format = 'pdf')
 plt.show()

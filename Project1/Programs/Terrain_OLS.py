@@ -15,8 +15,8 @@ figures_path_PNG, figures_path_PDF = Create_directory('Terrain_OLS')
 
 terrain1 = imread(file_path)
 
-N = 40
-#N=1000
+#N = 20
+N=200
 
 x,y,z = Terrain_Data(terrain1, N)
 
@@ -33,6 +33,12 @@ for degree in range(1,maxdegree + 1):
     X = Create_X(x,y, degree)
 
     z_train, z_test, X_train, X_test = train_test_split(z, X, test_size = 0.2)
+
+    scaler = StandardScaler(with_std=True)
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.fit_transform(X_test)
+    z_train = scaler.fit_transform(z_train)
+    z_test = scaler.fit_transform(z_test)
 
     beta_OLS = Optimal_coefs_OLS(X_train, z_train)
     betas.append(beta_OLS)
@@ -59,10 +65,10 @@ plt.plot(fit_degree, test_R2, label = 'Test r2 score')
 plt.xlabel('Polynomial fit degree')
 plt.ylabel('R2 score')
 plt.legend()
-#plt.savefig(figures_path_PNG / 'Terrain_OLS_points1000')
-#plt.savefig(figures_path_PDF / 'Terrain_OLS_points1000', format = 'pdf')
-plt.savefig(figures_path_PNG / 'Terrain_OLS_points40')
-plt.savefig(figures_path_PDF / 'Terrain_OLS_points40', format = 'pdf')
+plt.savefig(figures_path_PNG / 'Terrain_OLS_points200')
+plt.savefig(figures_path_PDF / 'Terrain_OLS_points200', format = 'pdf')
+#plt.savefig(figures_path_PNG / 'Terrain_OLS_points20')
+#plt.savefig(figures_path_PDF / 'Terrain_OLS_points20', format = 'pdf')
 plt.show()
 
 plt.figure(2)
