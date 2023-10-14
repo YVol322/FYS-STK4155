@@ -13,7 +13,22 @@ def Data(N):
 
     z = FrankeFunction(x, y) + np.random.normal(0, 0.1, np.shape(x))
     z = z.reshape(-1,1)
+
     return x,y,z
+
+def Terrain_Data(terrain, N):
+
+    terrain_square = terrain[:N,:N]
+
+    x = np.linspace(0,1, np.shape(terrain_square)[0])
+    y = np.linspace(0,1, np.shape(terrain_square)[1])
+    x, y = np.meshgrid(x,y)
+
+    z = terrain_square
+    z = z.reshape(-1,1)
+
+    return x,y,z
+    
 
 
 def FrankeFunction(x,y):

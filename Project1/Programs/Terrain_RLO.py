@@ -1,15 +1,25 @@
-import numpy as np
 import matplotlib.pyplot as plt
+from pathlib import Path
+import numpy as np
 from sklearn.linear_model import Lasso
+from sklearn.preprocessing import  StandardScaler
+from imageio import imread
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
-from Functions import Data, Create_directory, Create_X, Optimal_coefs_OLS, Optimal_coefs_Ridge, Prediction
+from Functions import Create_directory, Terrain_Data, Create_X, Optimal_coefs_OLS, Optimal_coefs_Ridge, Prediction
 
+np.random.seed(1)
 
-np.random.seed(6)
+current_path = Path.cwd().resolve()
+file_path = current_path.parent / 'Data' / 'SRTM_data_Norway_2.tif'
+figures_path_PNG, figures_path_PDF = Create_directory('Terrain_RLO')
 
-N = 20
-x,y,z = Data(N)
+terrain1 = imread(file_path)
+
+N = 40
+#N=1000
+
+x,y,z = Terrain_Data(terrain1, N)
 
 test_MSE_Ridge = []
 train_MSE_Ridge = []
@@ -28,16 +38,20 @@ train_R2_Lasso = []
 
 fit_degree = []
 
-figures_path_PNG, figures_path_PDF = Create_directory('RLO')
-
-l = 0.01
-#l = 1
+#l = 0.01
+l = 1
 maxdegree = 5
 
 for degree in range(1, maxdegree + 1):
     X = Create_X(x,y, degree)
 
     z_train, z_test, X_train, X_test = train_test_split(z, X, test_size = 0.2)
+
+    scaler = StandardScaler(with_std=False)
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.fit_transform(X_test)
+    z_train = scaler.fit_transform(z_train)
+    z_test = scaler.fit_transform(z_test)
 
     beta_OLS = Optimal_coefs_OLS(X_train, z_train)
 
@@ -105,8 +119,8 @@ for i in range(1, 4):
     plt.subplot(4, 1, i)
     plt.gca().set_xticks([])
 
-plt.savefig(figures_path_PNG / 'RLO_points20_lmb1e-2')
-plt.savefig(figures_path_PDF / 'RLO_points20_lmb1e-2', format = "pdf")
-#plt.savefig(figures_path_PNG / 'RLO_points20_lmb1e1')
-#plt.savefig(figures_path_PDF / 'RLO_points20_lmb1e1', format = "pdf")
+#plt.savefig(figures_path_PNG / 'Terrain_RLO_points20_lmb1e-2')
+#plt.savefig(figures_path_PDF / 'Terrain_RLO_points20_lmb1e-2', format = "pdf")
+plt.savefig(figures_path_PNG / 'RLO_points20_lmb1e1')
+plt.savefig(figures_path_PDF / 'RLO_points20_lmb1e1', format = "pdf")
 plt.show()
