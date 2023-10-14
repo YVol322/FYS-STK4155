@@ -2,8 +2,10 @@ import numpy as np
 from pathlib import Path
 from Functions import FrankeFunction, Plot_Franke, Create_directory
 
-x = np.arange(0, 1, 0.05)
-y = np.arange(0, 1, 0.05)
+N = 20
+
+x = np.arange(0, 1, 1/N)
+y = np.arange(0, 1, 1/N)
 x, y = np.meshgrid(x,y)
 
 z = FrankeFunction(x, y)

@@ -4,6 +4,18 @@ from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 from pathlib import Path
 
+def Data(N):
+    N = 20
+    #N = 200
+    x = np.arange(0, 1, 1/N)
+    y = np.arange(0, 1, 1/N)
+    x, y = np.meshgrid(x,y)
+
+    z = FrankeFunction(x, y) + np.random.normal(0, 0.1, np.shape(x))
+    z = z.reshape(-1,1)
+    return x,y,z
+
+
 def FrankeFunction(x,y):
     term1 = 0.75*np.exp(-(0.25*(9*x-2)**2) - 0.25*((9*y-2)**2))
     term2 = 0.75*np.exp(-((9*x+1)**2)/49.0 - 0.1*(9*y+1))
@@ -11,7 +23,7 @@ def FrankeFunction(x,y):
     term4 = -0.2*np.exp(-(9*x-4)**2 - (9*y-7)**2)
     return term1 + term2 + term3 + term4
 
-def create_X(x, y, n ):
+def Create_X(x, y, n ):
 	if len(x.shape) > 1:
 		x = np.ravel(x)
 		y = np.ravel(y)
@@ -38,6 +50,8 @@ def Create_directory(path):
 
     figures_path_PDF = current_path.parent / "Figures" / path / "PDF"
     figures_path_PDF.mkdir(parents=True, exist_ok=True)
+
+    return figures_path_PNG, figures_path_PDF
 
 def Plot_Franke(x, y, z, name):
     fig = plt.figure()

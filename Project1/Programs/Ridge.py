@@ -1,39 +1,29 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from pathlib import Path
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
-from Functions import FrankeFunction, create_X, Optimal_coefs_Ridge, Prediction, Create_directory
+from Functions import Data, Create_directory, Create_X, Optimal_coefs_Ridge, Prediction
 
 
 np.random.seed(2)
 
-#N = 20
-N = 200
-x = np.arange(0, 1, 1/N)
-y = np.arange(0, 1, 1/N)
-x, y = np.meshgrid(x,y)
-
-z = FrankeFunction(x, y) + np.random.normal(0, 0.1, np.shape(x))
-z = z.reshape(-1,1)
+N = 20
+#N = 200
+x,y,z = Data(N)
 
 test_MSE_Ridge = []
 train_MSE_Ridge = []
 test_R2_Ridge = []
 train_R2_Ridge = []
 
-Create_directory('Ridge')
-
-current_path = Path.cwd().resolve()
-figures_path_PNG = current_path.parent / 'Figures' / 'Ridge' / 'PNG'
-figures_path_PDF = current_path.parent / 'Figures' / 'Ridge' / 'PDF'
+figures_path_PNG, figures_path_PDF = Create_directory('Ridge')
 
 n_lambdas = 100
 l = np.logspace(-3, 3, n_lambdas)
 degree = 5
 
 for lmbda in l:
-    X = create_X(x,y, degree)
+    X = Create_X(x,y, degree)
 
     z_train, z_test, X_train, X_test = train_test_split(z, X, test_size = 0.2)
 
@@ -59,7 +49,7 @@ plt.legend()
 plt.subplot(2,1,2)
 plt.plot(l, train_R2_Ridge, label = 'Train r2 score')
 plt.plot(l, test_R2_Ridge, label = 'Test r2 score')
-plt.xlabel('$\lambda$')
+plt.xlabel('Penalty parameter')
 plt.xscale('log')
 plt.ylabel('R2 score')
 plt.legend()

@@ -1,21 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from pathlib import Path
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
-from Functions import FrankeFunction, create_X, Optimal_coefs_OLS, Prediction, Create_directory
+from Functions import Data, Create_directory, Create_X, Optimal_coefs_OLS, Prediction
 
 
 np.random.seed(3)
 
 N = 20
 #N = 200
-x = np.arange(0, 1, 1/N)
-y = np.arange(0, 1, 1/N)
-x, y = np.meshgrid(x,y)
-
-z = FrankeFunction(x, y) + np.random.normal(0, 0.1, np.shape(x))
-z = z.reshape(-1,1)
+x,y,z = Data(N)
 
 test_MSE = []
 train_MSE = []
@@ -24,16 +18,12 @@ train_R2 = []
 betas = []
 fit_degree = []
 
-Create_directory('OLS')
-
-current_path = Path.cwd().resolve()
-figures_path_PNG = current_path.parent / 'Figures' / 'OLS' / 'PNG'
-figures_path_PDF = current_path.parent / 'Figures' / 'OLS' / 'PDF'
+figures_path_PNG, figures_path_PDF = Create_directory('OLS')
 
 maxdegree = 5
 
 for degree in range(1,maxdegree + 1):
-    X = create_X(x,y, degree)
+    X = Create_X(x,y, degree)
 
     z_train, z_test, X_train, X_test = train_test_split(z, X, test_size = 0.2)
 
@@ -72,8 +62,8 @@ plt.figure(2)
 for x in betas:
     plt.scatter(x, [fit_degree[betas.index(x)]] * len(x))
 
-plt.xlabel(r'$\beta$')
-plt.ylabel('n')
+plt.xlabel('Optimal coefficients')
+plt.ylabel('Polynomial fit degree')
 plt.savefig(figures_path_PNG / 'OLS_betas')
 plt.savefig(figures_path_PDF / 'OLS_betas', format = 'pdf')
 plt.show()

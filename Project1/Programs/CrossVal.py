@@ -1,22 +1,19 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-from Functions import FrankeFunction, create_X, Optimal_coefs_OLS, Optimal_coefs_Ridge, Prediction
-from pathlib import Path
-from sklearn.model_selection import KFold
-from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import Lasso
+from sklearn.model_selection import KFold
+from sklearn.model_selection import train_test_split
+from Functions import Data, Create_X, Optimal_coefs_OLS, Optimal_coefs_Ridge, Prediction
+from sklearn.metrics import mean_squared_error
 
 np.random.seed(12)
 
 degree = 5
 
-x = np.arange(0, 1, 0.05)
-y = np.arange(0, 1, 0.05)
+N = 20
+#N = 200
+x,y,z = Data(N)
 
-z = FrankeFunction(x, y)
-
-X = create_X(x,y, degree)
+X = Create_X(x,y, degree)
 
 z_train, z_test, X_train, X_test = train_test_split(z, X, test_size = 0.2)
 
@@ -28,7 +25,8 @@ MSE_Risdge = np.zeros(k)
 MSE_Lasso = np.zeros(k)
 
 i = 0
-lmb = 0.1
+lmb = 0.01
+#lmb = 10
 for train_inds, test_inds in kfold.split(z):
     X_train = X[train_inds]
     z_train = z[train_inds]
