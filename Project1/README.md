@@ -15,12 +15,12 @@ Our code for the solution of the problems and figures have next structure:
                     - PDF Figures
                 - PNG
                     - PNG Figures
-                - Frnake_plot
-                    - PDF
-                        - PDF Figures
-                    - PNG
-                        - PNG Figures
-                - ...
+            - Franke_plot
+                - PDF
+                      - PDF Figures
+                  - PNG
+                      - PNG Figures
+            - ...
         - Programs 
             - Bias_Variance.py
             - CrossVal.py
