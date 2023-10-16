@@ -17,9 +17,9 @@ Our code for the solution of the problems and figures have next structure:
                     - PNG Figures
             - Franke_plot
                 - PDF
-                      - PDF Figures
-                  - PNG
-                      - PNG Figures
+                    - PDF Figures
+                - PNG
+                    - PNG Figures
             - ...
         - Programs 
             - Bias_Variance.py
