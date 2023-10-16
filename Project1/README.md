@@ -49,30 +49,20 @@ python3 program2.py
 ```
 for some operative systems.
 
-Tou can 
+Tou can notice that there are Bias_Variance.py, ... programs and Terrain_Bias_Variance.py programs. They are the same programs, just with different datasets. Since the programs are the same, comments are povided only for Bias_Variance.py types of pograms.
 
-## Comment on the results
-We have included the solution to our calculations in `.csv`-files. We have only included results up to `n_steps = 100 000`, because Github had a memory limit of `300Mb`. In our plotting code, we use results up to `n_steps = 1 000 000` and  `n_steps = 10 000 000`. To generate these, you will need to compile and run the c++ programs in which they are generated.
-
-## The All folder
-We have also decided to create a directory containing one C++ program and one Python program that solves all the tasks. The All directory has a structure:
-- All
-
-    - Thomas.cpp
-    - Thomas.py
-    - Results
-        - Figures
-            - figure1.pdf
-            - ...
-        - Tables
-            - Analytical_solution
-                - table1.csv
-                - ...
-            - General_Algorithm
-                - table2.csv
-                - ...
-            - Special_Algorithm
-                - table3.csv
-                - ...
-
-To run these programs, you can use the procedure from above while in the directory All.
+Suggestet order of running the programs and short desciption of them:
+- Franke_plot.py - plots the Franke's function with and without noise.
+- OLS.py - Linear regression on Franke's function.
+- Ridge.py - Ridge regression on Franke's function.
+- Lasso.py - Lasso regression on Franke's function.
+- RLO.py - Comparison of there 3 regressions on Franke's function.
+- Bias_Variance.py - Bootsrap method and bias-variance trade-off on Franke's function.
+- CrossVal.py - Cross validation on Franke's function.
+- Terrain_Data - plot the terrain data.
+- Terrain_OLS.py - Linear regression on Terrain data.
+- Terrain_Ridge.py - Ridge regression on Terrain data.
+- Terrain_Lasso.py - Lasso regression on Terrain data.
+- Terrain_RLO.py - Comparison of there 3 regressions on Terrain data.
+- Terrain_Bias_Variance.py - Bootsrap method and bias-variance trade-off on Terrain data.
+- Terrain_CrossVal.py - Cross validation on Terrain data.
