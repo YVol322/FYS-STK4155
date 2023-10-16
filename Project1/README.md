@@ -49,7 +49,7 @@ python3 OLS.py
 ```
 for some operative systems.
 
-You can notice that there are Bias_Variance.py, ... programs and Terrain_Bias_Variance.py programs. They are the same programs, just with different datasets. Since the programs are the same, comments are povided only for Bias_Variance.py types of pograms.
+You can notice that there are Bias_Variance.py, ... programs and Terrain_Bias_Variance.py programs. They are the same programs, just with different datasets. Since the programs are the same, comments are povided only for Bias_Variance.py types of programs.
 
 Suggestet order of running the programs and short desciption of them:
 - Franke_plot.py - plots the Franke's function with and without noise.
@@ -69,4 +69,4 @@ Suggestet order of running the programs and short desciption of them:
 
 Function.py can not be runned. It is just a program, that contains functions declarations.
 
-PNG and PDF figures are the same, just in deifferent formats. This is done due to reason, that LaTex has better quality when working with pdf figures then png ones.
+PNG and PDF figures are the same, just in different formats. This is done due to reason, that LaTex has better quality when working with PDF figures then PNG ones.
