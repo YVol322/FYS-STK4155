@@ -68,3 +68,5 @@ Suggestet order of running the programs and short desciption of them:
 - Terrain_CrossVal.py - Cross validation on Terrain data.
 
 Function.py can not be runned. It is just a program, that contains functions declarations.
+
+PNG and PDF figures are the same, just in deifferent formats. This is done due to reason, that LaTex has better quality when working with pdf figures then png ones.
