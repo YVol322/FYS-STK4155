@@ -7,9 +7,9 @@ from Functions import Data, Create_directory, Create_X, Optimal_coefs_OLS, Predi
 
 np.random.seed(3)
 
-N = 20
+N = 20 # Number of x and y points.
 #N = 200
-x,y,z = Data(N)
+x,y,z = Data(N) # Generating the data.
 
 test_MSE = []
 train_MSE = []
@@ -18,27 +18,30 @@ train_R2 = []
 betas = []
 fit_degree = []
 
-figures_path_PNG, figures_path_PDF = Create_directory('OLS')
+figures_path_PNG, figures_path_PDF = Create_directory('OLS') # Creating directory, to save figures to.
 
 maxdegree = 5
 
 for degree in range(1,maxdegree + 1):
-    X = Create_X(x,y, degree)
+    X = Create_X(x,y, degree) # Filling design matrix.
 
-    z_train, z_test, X_train, X_test = train_test_split(z, X, test_size = 0.2)
+    z_train, z_test, X_train, X_test = train_test_split(z, X, test_size = 0.2) # Train-test split of the data.
 
-    beta_OLS = Optimal_coefs_OLS(X_train, z_train)
+    beta_OLS = Optimal_coefs_OLS(X_train, z_train) # OLS optimal coefs uing matrix inv.
     betas.append(beta_OLS)
 
-    z_train_OLS = Prediction(X_train, beta_OLS)
-    z_test_OLS = Prediction(X_test, beta_OLS)
+    z_train_OLS = Prediction(X_train, beta_OLS) # OLS train prediction.
+    z_test_OLS = Prediction(X_test, beta_OLS) # OLS test prediction.
 
+    # Saving MSEs and R2 scores and fit degree to lists.
     test_MSE.append(mean_squared_error(z_test, z_test_OLS))
     train_MSE.append(mean_squared_error(z_train, z_train_OLS))
     test_R2.append(r2_score(z_test, z_test_OLS))
     train_R2.append(r2_score(z_train, z_train_OLS))
     fit_degree.append(degree)
 
+
+# Plot of MSE and R2 score vs model complexity.
 plt.figure(1)
 plt.style.use('ggplot')
 plt.subplot(2,1,1)
@@ -52,18 +55,19 @@ plt.plot(fit_degree, test_R2, label = 'Test r2 score')
 plt.xlabel('Polynomial fit degree')
 plt.ylabel('R2 score')
 plt.legend()
-plt.savefig(figures_path_PNG / 'OLS_points20')
-plt.savefig(figures_path_PDF / 'OLS_points20', format = 'pdf')
+#plt.savefig(figures_path_PNG / 'OLS_points20')
+#plt.savefig(figures_path_PDF / 'OLS_points20', format = 'pdf')
 #plt.savefig(figures_path_PNG / 'OLS_points200')
 #plt.savefig(figures_path_PDF / 'OLS_points200', format = 'pdf')
 plt.show()
 
+# Plot of optimal coefs vs model complexity.
 plt.figure(2)
 for x in betas:
     plt.scatter(x, [fit_degree[betas.index(x)]] * len(x))
 
 plt.xlabel('Optimal coefficients')
 plt.ylabel('Polynomial fit degree')
-plt.savefig(figures_path_PNG / 'OLS_betas')
-plt.savefig(figures_path_PDF / 'OLS_betas', format = 'pdf')
+#plt.savefig(figures_path_PNG / 'OLS_betas')
+#plt.savefig(figures_path_PDF / 'OLS_betas', format = 'pdf')
 plt.show()
