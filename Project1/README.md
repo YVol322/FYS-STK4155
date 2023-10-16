@@ -66,3 +66,5 @@ Suggestet order of running the programs and short desciption of them:
 - Terrain_RLO.py - Comparison of there 3 regressions on Terrain data.
 - Terrain_Bias_Variance.py - Bootsrap method and bias-variance trade-off on Terrain data.
 - Terrain_CrossVal.py - Cross validation on Terrain data.
+
+Function.py can not be runned. It is just a program, that contains functions declarations.
