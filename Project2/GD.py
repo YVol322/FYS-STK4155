@@ -18,8 +18,7 @@ for eta in etas:
     i=0
     beta = np.random.randn(degree,1)
     while(mean_squared_error(beta_linreg, beta)>eps):
-        gradient = (2.0/n)*X.T @ (X @ beta-y)
-        beta -= eta*gradient
+        beta = GD_iter(n ,X, y, beta, eta)
         i+=1
     iters.append(i)
     
