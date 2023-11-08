@@ -15,12 +15,12 @@ Our code for the solution of the problems and figures have next structure:
                     - PDF Figures
                 - PNG
                     - PNG Figures
-                - Frnake_plot
-                    - PDF
-                        - PDF Figures
-                    - PNG
-                        - PNG Figures
-                - ...
+            - Franke_plot
+                - PDF
+                    - PDF Figures
+                - PNG
+                    - PNG Figures
+            - ...
         - Programs 
             - Bias_Variance.py
             - CrossVal.py
@@ -41,15 +41,15 @@ Our code for the solution of the problems and figures have next structure:
 
 To run the python programs, navigate to the directory of the program and run it by typing:
 ```bash
-python program2.py
+python OLS.py
 ```
 or 
 ```bash
-python3 program2.py
+python3 OLS.py
 ```
 for some operative systems.
 
-Tou can notice that there are Bias_Variance.py, ... programs and Terrain_Bias_Variance.py programs. They are the same programs, just with different datasets. Since the programs are the same, comments are povided only for Bias_Variance.py types of pograms.
+You can notice that there are Bias_Variance.py, ... programs and Terrain_Bias_Variance.py programs. They are the same programs, just with different datasets. Since the programs are the same, comments are povided only for Bias_Variance.py types of programs.
 
 Suggestet order of running the programs and short desciption of them:
 - Franke_plot.py - plots the Franke's function with and without noise.
@@ -69,4 +69,4 @@ Suggestet order of running the programs and short desciption of them:
 
 Function.py can not be runned. It is just a program, that contains functions declarations.
 
-PNG and PDF figures are the same, just in deifferent formats. This is done due to reason, that LaTex has better quality when working with pdf figures then png ones.
+PNG and PDF figures are the same, just in different formats. This is done due to reason, that LaTex has better quality when working with PDF figures then PNG ones.
