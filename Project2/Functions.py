@@ -15,48 +15,87 @@ def Data():
 
     return x, y, X, n, degree
 
-def grad(n, X, beta, y):
-    gradient = (2.0/n)*X.T @ (X @ beta-y)
 
-    return gradient
+def GD(X, y, degree, n, eps, eta):
 
-def GD_iter(n, X, y, beta, eta):
-    gradient = grad(n, X, beta, y)
-    beta -= eta*gradient
+    beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
+    beta = np.random.randn(degree,1)
 
-    return beta
+    i=0
+    while(mean_squared_error(beta_linreg, beta)>eps):
+        gradient = (2.0/n)*X.T @ (X @ beta-y)
 
-def Ada(G, n, X, beta, y, eta, delta):
-    gradient = grad(n, X, beta, y)
+        beta -= eta*gradient
 
-    G += (gradient @ gradient.T)
-    G_diag = G.diagonal()
-    sqrt_G = np.sqrt(G_diag)
-    gamma = eta/(delta + sqrt_G).reshape(-1,1)
+        i+=1
+    
+    return beta, i
 
-    return gamma
 
-def RMS(G, rho, n, X, beta, y, eta, delta):
-    gradient = grad(n, X, beta, y)
+def Ada(X, y, degree, n, eps, eta, delta):
 
-    G = (rho*G+(1-rho)*gradient*gradient)
-    G_diag = G.diagonal()
-    sqrt_G = np.sqrt(G_diag)
-    gamma = eta/(delta + sqrt_G).reshape(-1,1)
+    beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
+    beta = np.random.randn(degree,1)
+    G = np.diag(np.zeros(degree))
 
-    return gamma
+    i=0
+    while(mean_squared_error(beta_linreg, beta)>eps):
+        gradient = (2.0/n)*X.T @ (X @ beta-y)
 
-def ADAM(beta1, beta2, n, X, beta, y, i, delta):
+        G += gradient*gradient
+        G_diag = G.diagonal()
+        sqrt_G = np.sqrt(G_diag)
+
+        gamma = eta/(delta + sqrt_G).reshape(-1,1)
+
+        beta -= gamma*gradient
+
+        i+=1
+
+
+    return beta, i
+
+def RMS(X, y, degree, n, eps, eta, delta, rho):
+    beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
+    beta = np.random.randn(degree,1)
+    G = np.diag(np.zeros(degree))
+
+    i=0
+    while(mean_squared_error(beta_linreg, beta)>eps):
+        gradient = (2.0/n)*X.T @ (X @ beta-y)
+
+        G = (rho*G+(1-rho)*gradient*gradient)
+        G_diag = G.diagonal()
+        sqrt_G = np.sqrt(G_diag)
+        gamma = eta/(delta + sqrt_G).reshape(-1,1)
+
+        beta -= gamma*gradient
+
+        i+=1
+
+
+    return beta, i
+
+def ADAM(X, y, degree, n, eps, eta, delta, beta1, beta2):
+    beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
+    beta = np.random.randn(degree,1)
+
     first_moment = 0.0
     second_moment = 0.0
     
-    gradient = grad(n, X, beta, y)
+    i=0
+    while(mean_squared_error(beta_linreg, beta)>eps):
+        gradient = (2.0/n)*X.T @ (X @ beta-y)
 
-    first_moment = beta1*first_moment + (1-beta1)*gradient
-    second_moment = beta2*second_moment+(1-beta2)*gradient*gradient
-    first_term = first_moment/(1.0-beta1**(i+1))
-    second_term = second_moment/(1.0-beta2**(i+1))
+        first_moment = beta1*first_moment + (1-beta1)*gradient
+        second_moment = beta2*second_moment+(1-beta2)*gradient*gradient
+        first_term = first_moment/(1.0-beta1**(i+1))
+        second_term = second_moment/(1.0-beta2**(i+1))
 
-    update = first_term/((np.sqrt(second_term)+delta) * gradient)
+        update = eta*first_term/(np.sqrt(second_term)+delta)
+        beta -= update
+        
+        i+=1
 
-    return update
+
+    return beta, i
