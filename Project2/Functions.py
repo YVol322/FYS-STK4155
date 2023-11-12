@@ -322,3 +322,139 @@ def SGD_ADAM(X, y, degree, n, eps, delta, beta1, beta2, t0, t1, M):
 
 
     return beta, epoch
+
+
+def SGDM(X, y, degree, n, eps, moment, t0, t1, M):
+
+    beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
+    beta = np.random.randn(degree,1)
+
+    change = 0
+
+    m = int(n/M)
+
+    epoch = 0
+    while(mean_squared_error(beta_linreg, beta)>eps):
+        for i in range(m):
+            k = M*np.random.randint(m)
+            xi = X[k:k+M]
+            yi = y[k:k+M]
+            gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
+
+            eta = learning_schedule(epoch*m+i, t0, t1)
+            new_change = eta*gradients + moment * change
+
+            beta -= new_change
+            change = new_change
+
+        epoch += 1
+
+    
+    return beta, epoch
+
+
+def SGDM_Ada(X, y, degree, n, eps, delta, moment, t0, t1, M):
+
+    beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
+    beta = np.random.randn(degree,1)
+    G = np.diag(np.zeros(degree))
+
+    change = 0
+
+    m = int(n/M)
+
+    epoch = 0
+    while(mean_squared_error(beta_linreg, beta)>eps):
+        for i in range(m):
+            k = M*np.random.randint(m)
+            xi = X[k:k+M]
+            yi = y[k:k+M]
+            gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
+
+            G += gradients*gradients
+            G_diag = G.diagonal()
+            sqrt_G = np.sqrt(G_diag)
+
+            eta = learning_schedule(epoch*m+i, t0, t1)
+            gamma = eta/(delta + sqrt_G).reshape(-1,1)
+            new_change = gamma*gradients + moment * change
+
+            beta -= new_change
+            change = new_change
+            print(beta[0])
+
+        epoch+=1
+
+
+    return beta, epoch
+
+
+def SGDM_RMS(X, y, degree, n, eps, delta, rho, moment, t0, t1, M):
+    beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
+    beta = np.random.randn(degree,1)
+    G = np.diag(np.zeros(degree))
+
+    change = 0
+
+    m = int(n/M)
+
+    epoch = 0
+    while(mean_squared_error(beta_linreg, beta)>eps):
+        for i in range(m):
+            k = M*np.random.randint(m)
+            xi = X[k:k+M]
+            yi = y[k:k+M]
+            gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
+
+            G = (rho*G+(1-rho)*gradients*gradients)
+            G_diag = G.diagonal()
+            sqrt_G = np.sqrt(G_diag)
+            
+            eta = learning_schedule(epoch*m+i, t0, t1)
+            gamma = eta/(delta + sqrt_G).reshape(-1,1)
+            new_change = gamma*gradients + moment * change
+
+            beta -= new_change
+            print(beta[0])
+            change = new_change
+
+        epoch += 1
+
+    return beta, epoch
+
+
+def SGDM_ADAM(X, y, degree, n, eps, delta, beta1, beta2, moment, t0, t1, M):
+    beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
+    beta = np.random.randn(degree,1)
+
+    first_moment = 0.0
+    second_moment = 0.0
+    
+    change = 0
+
+    m = int(n/M)
+    
+    epoch = 0
+    while(mean_squared_error(beta_linreg, beta)>eps):
+        for i in range(m):
+            k = M*np.random.randint(m)
+            xi = X[k:k+M]
+            yi = y[k:k+M]
+            gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
+
+            first_moment = beta1*first_moment + (1-beta1)*gradients
+            second_moment = beta2*second_moment+(1-beta2)*gradients*gradients
+            first_term = first_moment/(1.0-beta1**(i+1))
+            second_term = second_moment/(1.0-beta2**(i+1))
+
+            eta = learning_schedule(epoch*m+i, t0, t1)
+            update = eta*first_term/(np.sqrt(second_term)+delta)
+            new_change = update + moment * change
+
+            beta -= new_change
+            change = new_change
+        
+        epoch += 1
+
+
+    return beta, epoch
