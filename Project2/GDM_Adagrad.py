@@ -1,20 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from Functions import Ada_momentum
-
+from Functions import Data, Ada_momentum
 
 np.random.seed(2)
 
-n = 1000
-degree = 3
-x = np.arange(0, 1, 1/n).reshape(-1,1)
-y = 3 - 5 * x + 4 * x ** 2
-
-X = np.zeros((n, degree))
-
-for i in range(degree):
-    X[:, i] = (x**i).ravel()
+x, y, X, n, degree = Data()
 
 beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
 

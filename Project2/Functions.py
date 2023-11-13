@@ -24,17 +24,22 @@ def learning_schedule(t, t0, t1):
 def CostOLS(beta, n, y, X):
     return (1.0/n) * np.sum((y - X @ beta)**2)
 
+def CostRidge(beta, lmb, n, y, X):
+    return (1.0/n) * np.sum((y - X @ beta)**2) + lmb * np.sum(beta**2)
+
 
 def GD(X, y, degree, n, eps, eta):
 
     beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
     beta = np.random.randn(degree,1)
 
+    training_gradient = grad(CostOLS, 0)
+    #training_gradient = grad(CostRidge, 0)
+
     i=0
     while(mean_squared_error(beta_linreg, beta)>eps):
-        gradient = (2.0/n)*X.T @ (X @ beta-y)
-        #training_gradient = grad(CostOLS, 0)
-        #gradient = training_gradient(beta, n, y, X)
+        #gradient = (2.0/n)*X.T @ (X @ beta-y)
+        gradient = training_gradient(beta, n, y, X)
 
 
         beta -= eta*gradient
@@ -50,11 +55,12 @@ def Ada(X, y, degree, n, eps, eta, delta):
     beta = np.random.randn(degree,1)
     G = np.diag(np.zeros(degree))
 
+    training_gradient = grad(CostOLS, 0)
+
     i=0
     while(mean_squared_error(beta_linreg, beta)>eps):
-        gradient = (2.0/n)*X.T @ (X @ beta-y)
-        #training_gradient = grad(CostOLS, 0)
-        #gradient = training_gradient(beta, n, y, X)
+        #gradient = (2.0/n)*X.T @ (X @ beta-y)
+        gradient = training_gradient(beta, n, y, X)
 
         G += gradient*gradient
         G_diag = G.diagonal()
@@ -74,11 +80,12 @@ def RMS(X, y, degree, n, eps, eta, delta, rho):
     beta = np.random.randn(degree,1)
     G = np.diag(np.zeros(degree))
 
+    training_gradient = grad(CostOLS, 0)
+
     i=0
     while(mean_squared_error(beta_linreg, beta)>eps):
-        gradient = (2.0/n)*X.T @ (X @ beta-y)
-        #training_gradient = grad(CostOLS, 0)
-        #gradient = training_gradient(beta, n, y, X)
+        #gradient = (2.0/n)*X.T @ (X @ beta-y)
+        gradient = training_gradient(beta, n, y, X)
 
         G = (rho*G+(1-rho)*gradient*gradient)
         G_diag = G.diagonal()
@@ -98,12 +105,13 @@ def ADAM(X, y, degree, n, eps, eta, delta, beta1, beta2):
 
     first_moment = 0.0
     second_moment = 0.0
+
+    training_gradient = grad(CostOLS, 0)
     
     i=0
     while(mean_squared_error(beta_linreg, beta)>eps):
-        gradient = (2.0/n)*X.T @ (X @ beta-y)
-        #training_gradient = grad(CostOLS, 0)
-        #gradient = training_gradient(beta, n, y, X)
+        #gradient = (2.0/n)*X.T @ (X @ beta-y)
+        gradient = training_gradient(beta, n, y, X)
 
         first_moment = beta1*first_moment + (1-beta1)*gradient
         second_moment = beta2*second_moment+(1-beta2)*gradient*gradient
@@ -125,11 +133,12 @@ def GD_momentum(X, y, degree, n, eps, eta, moment):
 
     change = 0
 
+    training_gradient = grad(CostOLS, 0)
+
     i=0
     while(mean_squared_error(beta_linreg, beta)>eps):
-        gradient = (2.0/n)*X.T @ (X @ beta-y)
-        #training_gradient = grad(CostOLS, 0)
-        #gradient = training_gradient(beta, n, y, X)
+        #gradient = (2.0/n)*X.T @ (X @ beta-y)
+        gradient = training_gradient(beta, n, y, X)
 
         new_change = eta*gradient + moment * change
 
@@ -148,11 +157,12 @@ def Ada_momentum(X, y, degree, n, eps, eta, delta, moment):
 
     change = 0
 
+    training_gradient = grad(CostOLS, 0)
+
     i=0
     while(mean_squared_error(beta_linreg, beta)>eps):
-        gradient = (2.0/n)*X.T @ (X @ beta-y)
-        #training_gradient = grad(CostOLS, 0)
-        #gradient = training_gradient(beta, n, y, X)
+        #gradient = (2.0/n)*X.T @ (X @ beta-y)
+        gradient = training_gradient(beta, n, y, X)
 
         G += gradient*gradient
         G_diag = G.diagonal()
@@ -176,11 +186,12 @@ def RMS_momentum(X, y, degree, n, eps, eta, delta, rho, moment):
 
     change = 0
 
+    training_gradient = grad(CostOLS, 0)
+
     i=0
     while(mean_squared_error(beta_linreg, beta)>eps):
-        gradient = (2.0/n)*X.T @ (X @ beta-y)
-        #training_gradient = grad(CostOLS, 0)
-        #gradient = training_gradient(beta, n, y, X)
+        #gradient = (2.0/n)*X.T @ (X @ beta-y)
+        gradient = training_gradient(beta, n, y, X)
 
         G = (rho*G+(1-rho)*gradient*gradient)
         G_diag = G.diagonal()
@@ -206,12 +217,13 @@ def ADAM_momentum(X, y, degree, n, eps, eta, delta, beta1, beta2, moment):
     second_moment = 0.0
 
     change = 0
+
+    training_gradient = grad(CostOLS, 0)
     
     i=0
     while(mean_squared_error(beta_linreg, beta)>eps):
-        gradient = (2.0/n)*X.T @ (X @ beta-y)
-        #training_gradient = grad(CostOLS, 0)
-        #gradient = training_gradient(beta, n, y, X)
+        #gradient = (2.0/n)*X.T @ (X @ beta-y)
+        gradient = training_gradient(beta, n, y, X)
 
         first_moment = beta1*first_moment + (1-beta1)*gradient
         second_moment = beta2*second_moment+(1-beta2)*gradient*gradient
@@ -237,16 +249,17 @@ def SGD(X, y, degree, n, eps, t0, t1, M):
 
     m = int(n/M)
 
+    training_gradient = grad(CostOLS, 0)
+
     epoch = 0
     while(mean_squared_error(beta_linreg, beta)>eps):
         for i in range(m):
             k = M*np.random.randint(m)
             xi = X[k:k+M]
             yi = y[k:k+M]
-            gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
-            #training_gradient = grad(CostOLS, 0)
-            #gradients = training_gradient(beta, n, y, X)
-            
+            #gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
+            gradients = training_gradient(beta, n, y, X)
+
             eta = learning_schedule(epoch*m+i, t0, t1)
             beta -= eta*gradients
         epoch += 1
@@ -263,15 +276,16 @@ def SGD_Ada(X, y, degree, n, eps, delta, t0, t1, M):
 
     m = int(n/M)
 
+    training_gradient = grad(CostOLS, 0)
+
     epoch = 0
     while(mean_squared_error(beta_linreg, beta)>eps):
         for i in range(m):
             k = M*np.random.randint(m)
             xi = X[k:k+M]
             yi = y[k:k+M]
-            gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
-            #training_gradient = grad(CostOLS, 0)
-            #gradients = training_gradient(beta, n, y, X)
+            #gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
+            gradients = training_gradient(beta, n, y, X)
 
             G += gradients*gradients
             G_diag = G.diagonal()
@@ -296,15 +310,16 @@ def SGD_RMS(X, y, degree, n, eps, delta, rho, t0, t1, M):
 
     m = int(n/M)
 
+    training_gradient = grad(CostOLS, 0)
+
     epoch = 0
     while(mean_squared_error(beta_linreg, beta)>eps):
         for i in range(m):
             k = M*np.random.randint(m)
             xi = X[k:k+M]
             yi = y[k:k+M]
-            gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
-            #training_gradient = grad(CostOLS, 0)
-            #gradients = training_gradient(beta, n, y, X)
+            #gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
+            gradients = training_gradient(beta, n, y, X)
 
             G = (rho*G+(1-rho)*gradients*gradients)
             G_diag = G.diagonal()
@@ -328,6 +343,8 @@ def SGD_ADAM(X, y, degree, n, eps, delta, beta1, beta2, t0, t1, M):
     second_moment = 0.0
 
     m = int(n/M)
+
+    training_gradient = grad(CostOLS, 0)
     
     epoch = 0
     while(mean_squared_error(beta_linreg, beta)>eps):
@@ -335,9 +352,8 @@ def SGD_ADAM(X, y, degree, n, eps, delta, beta1, beta2, t0, t1, M):
             k = M*np.random.randint(m)
             xi = X[k:k+M]
             yi = y[k:k+M]
-            gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
-            #training_gradient = grad(CostOLS, 0)
-            #gradients = training_gradient(beta, n, y, X)
+            #gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
+            gradients = training_gradient(beta, n, y, X)
 
             first_moment = beta1*first_moment + (1-beta1)*gradients
             second_moment = beta2*second_moment+(1-beta2)*gradients*gradients
@@ -365,15 +381,16 @@ def SGDM(X, y, degree, n, eps, moment, t0, t1, M):
 
     m = int(n/M)
 
+    training_gradient = grad(CostOLS, 0)
+
     epoch = 0
     while(mean_squared_error(beta_linreg, beta)>eps):
         for i in range(m):
             k = M*np.random.randint(m)
             xi = X[k:k+M]
             yi = y[k:k+M]
-            gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
-            #training_gradient = grad(CostOLS, 0)
-            #gradients = training_gradient(beta, n, y, X)
+            #gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
+            gradients = training_gradient(beta, n, y, X)
 
             eta = learning_schedule(epoch*m+i, t0, t1)
             new_change = eta*gradients + moment * change
@@ -397,15 +414,16 @@ def SGDM_Ada(X, y, degree, n, eps, delta, moment, t0, t1, M):
 
     m = int(n/M)
 
+    training_gradient = grad(CostOLS, 0)
+
     epoch = 0
     while(mean_squared_error(beta_linreg, beta)>eps):
         for i in range(m):
             k = M*np.random.randint(m)
             xi = X[k:k+M]
             yi = y[k:k+M]
-            gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
-            #training_gradient = grad(CostOLS, 0)
-            #gradients = training_gradient(beta, n, y, X)
+            #gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
+            gradients = training_gradient(beta, n, y, X)
 
             G += gradients*gradients
             G_diag = G.diagonal()
@@ -434,15 +452,16 @@ def SGDM_RMS(X, y, degree, n, eps, delta, rho, moment, t0, t1, M):
 
     m = int(n/M)
 
+    training_gradient = grad(CostOLS, 0)
+
     epoch = 0
-    while(mean_squared_error(beta_linreg, beta)>eps):
+    while(mean_squared_error(beta_Ridge, beta)>eps):
         for i in range(m):
             k = M*np.random.randint(m)
             xi = X[k:k+M]
             yi = y[k:k+M]
-            gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
-            #training_gradient = grad(CostOLS, 0)
-            #gradients = training_gradient(beta, n, y, X)
+            #gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
+            gradients = training_gradient(beta, n, y, X)
 
             G = (rho*G+(1-rho)*gradients*gradients)
             G_diag = G.diagonal()
@@ -471,6 +490,8 @@ def SGDM_ADAM(X, y, degree, n, eps, delta, beta1, beta2, moment, t0, t1, M):
     change = 0
 
     m = int(n/M)
+
+    training_gradient = grad(CostOLS, 0)
     
     epoch = 0
     while(mean_squared_error(beta_linreg, beta)>eps):
@@ -478,8 +499,7 @@ def SGDM_ADAM(X, y, degree, n, eps, delta, beta1, beta2, moment, t0, t1, M):
             k = M*np.random.randint(m)
             xi = X[k:k+M]
             yi = y[k:k+M]
-            gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
-            #training_gradient = grad(CostOLS, 0)
+            #gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
             #gradients = training_gradient(beta, n, y, X)
 
             first_moment = beta1*first_moment + (1-beta1)*gradients
