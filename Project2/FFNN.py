@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
-from Functions import Data, sigmoid, sigmoid_derivative
+from Functions import Data, sigmoid, sigmoid_derivative, Costfunction_grad
 import matplotlib.pyplot as plt
 
 np.random.seed(2023)
@@ -18,66 +18,81 @@ n_hidden_nodes = 4 # Number of nods in hidden layers
 n_hidden_layers = 1 # Number of hidden layers
 n_output_nodes = 1 # Number of hidden layers
 
-hidden_weights = np.random.randn(n_features, n_hidden_nodes)
-hidden_bias = np.zeros(n_hidden_nodes) + 0.01
+weigths = []
+biases = []
 
+hidden_weights_1 = np.random.randn(n_features, n_hidden_nodes)
+hidden_bias_1 = np.zeros(n_hidden_nodes) + 0.01
 
-#hidden_weights_2 = np.random.randn(n_features, n_hidden_nodes)
-#hidden_bias_2 = np.zeros(n_hidden_nodes) + 0.01
+weigths.append(hidden_weights_1)
+biases.append(hidden_bias_1)
+
+for i in range(n_hidden_layers - 1):
+    hidden_weights_ = np.random.randn(n_hidden_nodes, n_hidden_nodes)
+    hidden_bias_ = np.zeros(n_hidden_nodes) + 0.01
+    weigths.append(hidden_weights_)
+    biases.append(hidden_bias_)
 
 output_weights = np.random.randn(n_hidden_nodes, n_output_nodes)
 output_bias = np.zeros(n_output_nodes) + 0.01
+weigths.append(output_weights)
+biases.append(output_bias)
 
-def FeedForward(X, W1, b1, Wout, bout):
-    z1 = X @ W1 + b1
-    a1 = sigmoid(z1)
+def FeedForward(X, W_list, b_list):
+    z_list = []
+    a_list = []
 
-    z2 = a1 @ Wout + bout
+    z_1 = X @ W_list[0] + b_list[0]
+    z_list.append(z_1)
 
-    return z2, z1, a1
+    a_1 = sigmoid(z_1)
+    a_list.append(a_1)
+
+    for i in range(len(W_list) - 1):
+        z_i = a_list[i] @ W_list[i+1] + b_list[i+1]
+        z_list.append(z_i)
+
+        if i == len(W_list) - 2: break
+
+        a_i = sigmoid(z_i)
+        a_list.append(a_i)
+    
+    return z_list, a_list
+
+def BackPropagation(y_train, X_train, W_list, b_list, a_list, z_list):
+    delta_list = []
+    delta_out = Costfunction_grad(y_train, z_list[-1])
+    delta_list.append(delta_out)
+
+    for i in range(len(W_list) - 1):
+        delta_i = (delta_list[-1] @ (W_list[-1 - i]).T) * sigmoid_derivative(a_list[-1 - i])
+        delta_list.append(delta_i)
+    
+    delta_list.reverse()
+
+    W_list[0] -= gamma * (X_train.T @ delta_list[0])
+    b_list[0] -= gamma * np.sum(delta_list[0])
+
+    for i in range(len(W_list) - 1):
+        W_list[i + 1] -= gamma * (a_list[i].T @ delta_list[i + 1])
+        b_list[i + 1] -= gamma * np.sum(delta_list[i + 1])
 
 
+    return W_list, b_list
 
-def Costfunction_grad(y_true, y_pred):
-    return (y_pred - y_true)
-
-def BackPropagation(y_train, X_train, zout, W1, Wout, b1, bout, a1):
-    delta_out = Costfunction_grad(y_train, zout)
-
-    delta_hidden = (delta_out @ Wout.T) * sigmoid_derivative(a1)
-
-    W1 -= gamma * (X_train.T @ delta_hidden)
-    b1 -= gamma * np.sum(delta_hidden)
-    Wout -= gamma * (a1.T @ delta_out)
-    bout -= gamma * np.sum(delta_out)
-
-    return W1, b1, Wout, bout
 
 
 n = 10000
 
 for i in range(n):
-    print(i)
-    z2, z1, a1 = FeedForward(X_train, hidden_weights, hidden_bias, output_weights, output_bias)
+    z_list, a_list = FeedForward(X_train, weigths, biases)
 
-    hidden_weights, hidden_bias, output_weights, output_bias = BackPropagation(y_train, X_train, 
-                                z2, hidden_weights, output_weights, hidden_bias, output_bias, a1)
-    
-mse_train = mean_squared_error(y_train, z2)
-print(f"Mean Squared Error on Train Data: {mse_train}")
+    W_list, b_list = BackPropagation(y_train, X_train, weigths, biases, a_list, z_list)
 
-def predict(X, W1, b1, Wout, bout):
-    z1 = X @ W1 + b1
-    a1 = sigmoid(z1)
+    if(mean_squared_error(y_train, z_list[-1]) < 1e-4): break
 
-    z2 = a1 @ Wout + bout
-    predictions = z2
+print(f"Mean Squared Error on Train Data: {mean_squared_error(y_train, z_list[-1])}")
 
-    return predictions
+z_list, a_list = FeedForward(X_test, weigths, biases)
 
-# Using the trained weights and biases for prediction
-predictions_test = predict(X_test, hidden_weights, hidden_bias, output_weights, output_bias)
-
-# Calculate mean squared error on test data
-mse_test = mean_squared_error(y_test, predictions_test)
-print(f"Mean Squared Error on Test Data: {mse_test}")
+print(f"Mean Squared Error on Test Data: {mean_squared_error(y_test, z_list[-1])}")
