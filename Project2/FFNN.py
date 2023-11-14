@@ -9,27 +9,27 @@ x, y, X, n_inputs, degree = Data()
 
 X_train, X_test, y_train, y_test, x_train, x_test = train_test_split(X, y, x, test_size=0.2)
 
-n_inputs, n_features = X_train.shape
+n_inputs, n_features = x_train.shape
 
-gamma = 0.001
+gamma = 0.0001
 
-n_hidden_nodes = 4 # Number of nods in hidden layers
-n_hidden_layers = 1 # Number of hidden layers
+n_hidden_nodes = 6 # Number of nods in hidden layers
+n_hidden_layers = 2 # Number of hidden layers
 n_output_nodes = 1 # Number of hidden layers
 
 weigths, biases = initialize_W_and_b(n_features, n_hidden_nodes, n_hidden_layers, n_output_nodes)
 
 n = 10000
 for i in range(n):
-    z_list, a_list = FeedForward(X_train, weigths, biases)
+    z_list, a_list = FeedForward(x_train, weigths, biases)
 
-    W_list, b_list = BackPropagation(y_train, X_train, weigths, biases, a_list, z_list, gamma)
-    print(i)
+    W_list, b_list = BackPropagation(y_train, x_train, weigths, biases, a_list, z_list, gamma)
+    print(mean_squared_error(y_train, z_list[-1]))
 
     if(mean_squared_error(y_train, z_list[-1]) < 1e-4): break
 
 print(f"Mean Squared Error on Train Data: {mean_squared_error(y_train, z_list[-1])}")
 
-z_list, a_list = FeedForward(X_test, weigths, biases)
+z_list, a_list = FeedForward(x_test, weigths, biases)
 
 print(f"Mean Squared Error on Test Data: {mean_squared_error(y_test, z_list[-1])}")

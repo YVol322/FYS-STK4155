@@ -532,6 +532,13 @@ def RELU(x):
 def RELU_derivative(x):
     return np.where(x >= 0, 1, 0)
 
+def leaky_RELU(x, alpha=0.01):
+    return np.where(x >= 0, x, alpha * x)
+
+def leaky_RELU_derivative(x, alpha=0.01):
+    return np.where(x >= 0, 1, alpha)
+
+
 def Costfunction_grad(y_true, y_pred):
     return (y_pred - y_true)
 
@@ -565,7 +572,7 @@ def FeedForward(X, W_list, b_list):
     z_1 = X @ W_list[0] + b_list[0]
     z_list.append(z_1)
 
-    a_1 = sigmoid(z_1)
+    a_1 = RELU(z_1)
     a_list.append(a_1)
 
     for i in range(len(W_list) - 1):
