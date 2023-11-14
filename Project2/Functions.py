@@ -526,5 +526,77 @@ def sigmoid(x):
 def sigmoid_derivative(x):
     return x * (1 - x)
 
+def RELU(x):
+    return np.maximum(x, 0)
+
+def RELU_derivative(x):
+    return np.where(x >= 0, 1, 0)
+
 def Costfunction_grad(y_true, y_pred):
     return (y_pred - y_true)
+
+def initialize_W_and_b(n_features, n_hidden_nodes, n_hidden_layers, n_output_nodes):
+    weigths = []
+    biases = []
+
+    hidden_weights_1 = np.random.randn(n_features, n_hidden_nodes)
+    hidden_bias_1 = np.zeros(n_hidden_nodes) + 0.01
+
+    weigths.append(hidden_weights_1)
+    biases.append(hidden_bias_1)
+
+    for i in range(n_hidden_layers - 1):
+        hidden_weights_ = np.random.randn(n_hidden_nodes, n_hidden_nodes)
+        hidden_bias_ = np.zeros(n_hidden_nodes) + 0.01
+        weigths.append(hidden_weights_)
+        biases.append(hidden_bias_)
+
+    output_weights = np.random.randn(n_hidden_nodes, n_output_nodes)
+    output_bias = np.zeros(n_output_nodes) + 0.01
+    weigths.append(output_weights)
+    biases.append(output_bias)
+
+    return weigths, biases
+
+def FeedForward(X, W_list, b_list):
+    z_list = []
+    a_list = []
+
+    z_1 = X @ W_list[0] + b_list[0]
+    z_list.append(z_1)
+
+    a_1 = sigmoid(z_1)
+    a_list.append(a_1)
+
+    for i in range(len(W_list) - 1):
+        z_i = a_list[i] @ W_list[i+1] + b_list[i+1]
+        z_list.append(z_i)
+
+        if i == len(W_list) - 2: break
+
+        a_i = sigmoid(z_i)
+        a_list.append(a_i)
+    
+    return z_list, a_list
+
+def BackPropagation(y_train, X_train, W_list, b_list, a_list, z_list, gamma):
+    delta_list = []
+    delta_out = Costfunction_grad(y_train, z_list[-1])
+    delta_list.append(delta_out)
+
+    for i in range(len(W_list) - 1):
+        delta_i = (delta_list[-1] @ (W_list[-1 - i]).T) * sigmoid_derivative(a_list[-1 - i])
+        delta_list.append(delta_i)
+    
+    delta_list.reverse()
+
+
+    W_list[0] -= gamma * (X_train.T @ delta_list[0])
+    b_list[0] -= gamma * np.sum(delta_list[0])
+
+    for i in range(len(W_list) - 1):
+        W_list[i + 1] -= gamma * (a_list[i].T @ delta_list[i + 1])
+        b_list[i + 1] -= gamma * np.sum(delta_list[i + 1])
+
+
+    return W_list, b_list
