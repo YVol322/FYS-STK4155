@@ -518,3 +518,13 @@ def SGDM_ADAM(X, y, degree, n, eps, delta, beta1, beta2, moment, t0, t1, M):
 
 
     return beta, epoch
+
+
+def sigmoid(x):
+    return 1/(1 + np.exp(-x))
+
+def sigmoid_derivative(x):
+    return x * (1 - x)
+
+def Costfunction_grad(y_true, y_pred):
+    return (y_pred - y_true)
