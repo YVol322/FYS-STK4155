@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
-from Functions import Data, initialize_W_and_b, FeedForward, BackPropagation
+from Functions import Data, initialize_W_and_b, FeedForward, BackPropagation, StochasticBackPropagation
 
 np.random.seed(2023)
 
@@ -11,19 +11,21 @@ X_train, X_test, y_train, y_test, x_train, x_test = train_test_split(X, y, x, te
 
 n_inputs, n_features = x_train.shape
 
-gamma = 0.0001
+gamma = 0.1
 
-n_hidden_nodes = 6 # Number of nods in hidden layers
+n_hidden_nodes = 4 # Number of nods in hidden layers
 n_hidden_layers = 2 # Number of hidden layers
 n_output_nodes = 1 # Number of hidden layers
 
 weigths, biases = initialize_W_and_b(n_features, n_hidden_nodes, n_hidden_layers, n_output_nodes)
 
 n = 10000
+M = 10
+n_epoch = 10
 for i in range(n):
     z_list, a_list = FeedForward(x_train, weigths, biases)
 
-    W_list, b_list = BackPropagation(y_train, x_train, weigths, biases, a_list, z_list, gamma)
+    W_list, b_list = StochasticBackPropagation(y_train, x_train, weigths, biases, gamma, M, n_epoch)
     print(mean_squared_error(y_train, z_list[-1]))
 
     if(mean_squared_error(y_train, z_list[-1]) < 1e-4): break
