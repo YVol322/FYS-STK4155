@@ -1,13 +1,12 @@
 import autograd.numpy as np
 from sklearn.metrics import mean_squared_error
 from autograd import grad
-import random
-
-
+import pathlib
+import time
 
 
 def Data():
-    n = 1000
+    n = 10000
     degree = 3
     x = np.arange(0, 1, 1/n).reshape(-1,1)
     y = 3 - 5 * x + 4 * x ** 2
@@ -17,7 +16,25 @@ def Data():
     for i in range(degree):
         X[:, i] = (x**i).ravel()
 
-    return x, y, X, n, degree
+    return x, y, X
+
+def Create_dir(dir_name):
+    current_path = pathlib.Path.cwd().resolve()
+
+    figures_path = current_path.parent / 'Figures'
+    figures_path.mkdir(exist_ok=True, parents=True)
+
+    GD_figures_path = figures_path / dir_name
+    GD_figures_path.mkdir(exist_ok=True, parents=True)
+
+    PNG_path = GD_figures_path / 'PNG'
+    PNG_path.mkdir(exist_ok=True, parents=True)
+
+    PDF_path = GD_figures_path / 'PDF'
+    PDF_path.mkdir(exist_ok=True, parents=True)
+
+    return PNG_path, PDF_path
+
 
 def learning_schedule(t, t0, t1):
     return t0/(t+t1)
@@ -30,39 +47,43 @@ def CostRidge(beta, lmb, n, y, X):
     return (1.0/n) * np.sum((y - X @ beta)**2) + lmb * np.sum(beta**2)
 
 
-def GD(X, y, degree, n, eps, eta):
+def GD(X, y, degree, n, eps, eta, lmb, auto):
 
-    beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
+    I = np.eye(degree)
+    beta_Ridge = np.linalg.inv(X.T @ X + lmb * I) @ X.T @ y
     beta = np.random.randn(degree,1)
 
-    training_gradient = grad(CostOLS, 0)
-    #training_gradient = grad(CostRidge, 0)
+    training_gradient = grad(CostRidge, 0)
 
     i=0
-    while(mean_squared_error(beta_linreg, beta)>eps):
-        #gradient = (2.0/n)*X.T @ (X @ beta-y)
-        gradient = training_gradient(beta, n, y, X)
 
+    start_time = time.time()
+    while(mean_squared_error(beta_Ridge, beta)>eps):
+        if(auto == 1): gradient = (2.0/n)*X.T @ (X @ beta-y) + 2 * beta * lmb
+        else: gradient = 2/n * X.T @ (X @ beta - y) + lmb * I @ beta
 
         beta -= eta*gradient
 
+
         i+=1
+
+    elapsed_time = time.time() - start_time
     
-    return beta, i
+    return beta, i, elapsed_time
 
 
-def Ada(X, y, degree, n, eps, eta, delta):
+def Ada(X, y, degree, n, eps, eta, lmb):
 
-    beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
+    I = np.eye(degree)
+    beta_Ridge = np.linalg.inv(X.T @ X + lmb * I) @ X.T @ y
     beta = np.random.randn(degree,1)
+    
     G = np.diag(np.zeros(degree))
-
-    training_gradient = grad(CostOLS, 0)
+    delta = 1e-7
 
     i=0
-    while(mean_squared_error(beta_linreg, beta)>eps):
-        #gradient = (2.0/n)*X.T @ (X @ beta-y)
-        gradient = training_gradient(beta, n, y, X)
+    while(mean_squared_error(beta_Ridge, beta)>eps):
+        gradient = 2/n * X.T @ (X @ beta - y) + lmb * I @ beta
 
         G += gradient*gradient
         G_diag = G.diagonal()
@@ -74,20 +95,20 @@ def Ada(X, y, degree, n, eps, eta, delta):
 
         i+=1
 
-
     return beta, i
 
-def RMS(X, y, degree, n, eps, eta, delta, rho):
-    beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
-    beta = np.random.randn(degree,1)
-    G = np.diag(np.zeros(degree))
+def RMS(X, y, degree, n, eps, eta, rho, lmb):
 
-    training_gradient = grad(CostOLS, 0)
+    I = np.eye(degree)
+    beta_Ridge = np.linalg.inv(X.T @ X + lmb * I) @ X.T @ y
+    beta = np.random.randn(degree,1)
+
+    G = np.diag(np.zeros(degree))
+    delta = 1e-7
 
     i=0
-    while(mean_squared_error(beta_linreg, beta)>eps):
-        #gradient = (2.0/n)*X.T @ (X @ beta-y)
-        gradient = training_gradient(beta, n, y, X)
+    while(mean_squared_error(beta_Ridge, beta)>eps):
+        gradient = 2/n * X.T @ (X @ beta - y) + lmb * I @ beta
 
         G = (rho*G+(1-rho)*gradient*gradient)
         G_diag = G.diagonal()
@@ -98,22 +119,22 @@ def RMS(X, y, degree, n, eps, eta, delta, rho):
 
         i+=1
 
-
     return beta, i
 
-def ADAM(X, y, degree, n, eps, eta, delta, beta1, beta2):
-    beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
+def ADAM(X, y, degree, n, eps, eta, beta1, beta2, lmb):
+
+    I = np.eye(degree)
+    beta_Ridge = np.linalg.inv(X.T @ X + lmb * I) @ X.T @ y
     beta = np.random.randn(degree,1)
 
     first_moment = 0.0
     second_moment = 0.0
 
-    training_gradient = grad(CostOLS, 0)
+    delta = 1e-7
     
     i=0
-    while(mean_squared_error(beta_linreg, beta)>eps):
-        #gradient = (2.0/n)*X.T @ (X @ beta-y)
-        gradient = training_gradient(beta, n, y, X)
+    while(mean_squared_error(beta_Ridge, beta)>eps):
+        gradient = 2/n * X.T @ (X @ beta - y) + lmb * I @ beta
 
         first_moment = beta1*first_moment + (1-beta1)*gradient
         second_moment = beta2*second_moment+(1-beta2)*gradient*gradient
@@ -125,22 +146,20 @@ def ADAM(X, y, degree, n, eps, eta, delta, beta1, beta2):
         
         i+=1
 
-
     return beta, i
 
-def GD_momentum(X, y, degree, n, eps, eta, moment):
+def GD_momentum(X, y, degree, n, eps, eta, moment, lmb):
 
-    beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
+    I = np.eye(degree)
+    beta_Ridge = np.linalg.inv(X.T @ X + lmb * I) @ X.T @ y
+    beta = np.random.randn(degree,1)
     beta = np.random.randn(degree,1)
 
     change = 0
 
-    training_gradient = grad(CostOLS, 0)
-
     i=0
-    while(mean_squared_error(beta_linreg, beta)>eps):
-        #gradient = (2.0/n)*X.T @ (X @ beta-y)
-        gradient = training_gradient(beta, n, y, X)
+    while(mean_squared_error(beta_Ridge, beta)>eps):
+        gradient = 2/n * X.T @ (X @ beta - y) + lmb * I @ beta
 
         new_change = eta*gradient + moment * change
 
@@ -151,20 +170,18 @@ def GD_momentum(X, y, degree, n, eps, eta, moment):
     
     return beta, i
 
-def Ada_momentum(X, y, degree, n, eps, eta, delta, moment):
+def Ada_momentum(X, y, degree, n, eps, eta, moment):
 
     beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
     beta = np.random.randn(degree,1)
+
     G = np.diag(np.zeros(degree))
-
+    delta = 1e-7
     change = 0
-
-    training_gradient = grad(CostOLS, 0)
 
     i=0
     while(mean_squared_error(beta_linreg, beta)>eps):
-        #gradient = (2.0/n)*X.T @ (X @ beta-y)
-        gradient = training_gradient(beta, n, y, X)
+        gradient = (2.0/n)*X.T @ (X @ beta-y)
 
         G += gradient*gradient
         G_diag = G.diagonal()
@@ -181,19 +198,18 @@ def Ada_momentum(X, y, degree, n, eps, eta, delta, moment):
 
     return beta, i
 
-def RMS_momentum(X, y, degree, n, eps, eta, delta, rho, moment):
+def RMS_momentum(X, y, degree, n, eps, eta, rho, moment):
+    
     beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
     beta = np.random.randn(degree,1)
+
     G = np.diag(np.zeros(degree))
-
+    delta = 1e-7
     change = 0
-
-    training_gradient = grad(CostOLS, 0)
 
     i=0
     while(mean_squared_error(beta_linreg, beta)>eps):
-        #gradient = (2.0/n)*X.T @ (X @ beta-y)
-        gradient = training_gradient(beta, n, y, X)
+        gradient = (2.0/n)*X.T @ (X @ beta-y)
 
         G = (rho*G+(1-rho)*gradient*gradient)
         G_diag = G.diagonal()
@@ -203,7 +219,6 @@ def RMS_momentum(X, y, degree, n, eps, eta, delta, rho, moment):
         new_change = gamma*gradient + moment * change
 
         beta -= new_change
-        print(beta[0])
         change = new_change
 
         i+=1
@@ -211,21 +226,20 @@ def RMS_momentum(X, y, degree, n, eps, eta, delta, rho, moment):
     return beta, i
 
 
-def ADAM_momentum(X, y, degree, n, eps, eta, delta, beta1, beta2, moment):
+def ADAM_momentum(X, y, degree, n, eps, eta, beta1, beta2, moment):
+
     beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
     beta = np.random.randn(degree,1)
 
     first_moment = 0.0
     second_moment = 0.0
+    delta = 1e-7
 
     change = 0
-
-    training_gradient = grad(CostOLS, 0)
     
     i=0
     while(mean_squared_error(beta_linreg, beta)>eps):
-        #gradient = (2.0/n)*X.T @ (X @ beta-y)
-        gradient = training_gradient(beta, n, y, X)
+        gradient = (2.0/n)*X.T @ (X @ beta-y)
 
         first_moment = beta1*first_moment + (1-beta1)*gradient
         second_moment = beta2*second_moment+(1-beta2)*gradient*gradient
@@ -237,7 +251,6 @@ def ADAM_momentum(X, y, degree, n, eps, eta, delta, beta1, beta2, moment):
         new_change = update + moment * change
 
         beta -= new_change
-        print(beta[0])
         change = new_change
         
         i+=1
