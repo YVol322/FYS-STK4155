@@ -59,7 +59,7 @@ def GD(X, y, degree, n, eps, eta, lmb, auto):
 
     start_time = time.time()
     while(mean_squared_error(beta_Ridge, beta)>eps):
-        if(auto == 1): gradient = (2.0/n)*X.T @ (X @ beta-y) + 2 * beta * lmb
+        if(auto == 1): gradient = training_gradient(beta,lmb, n, y, X)
         else: gradient = 2/n * X.T @ (X @ beta - y) + lmb * I @ beta
 
         beta -= eta*gradient
@@ -257,50 +257,40 @@ def ADAM_momentum(X, y, degree, n, eps, eta, beta1, beta2, moment):
 
     return beta, i
 
-def SGD(X, y, degree, n, eps, t0, t1, M):
+def SGD(X, y, degree, n, t0, t1, M, n_epoch):
 
-    beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
     beta = np.random.randn(degree,1)
 
     m = int(n/M)
 
-    training_gradient = grad(CostOLS, 0)
-
-    epoch = 0
-    while(mean_squared_error(beta_linreg, beta)>eps):
+    for epoch in range(n_epoch):
         for i in range(m):
             k = M*np.random.randint(m)
             xi = X[k:k+M]
             yi = y[k:k+M]
-            #gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
-            gradients = training_gradient(beta, n, y, X)
+            gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
 
             eta = learning_schedule(epoch*m+i, t0, t1)
             beta -= eta*gradients
-        epoch += 1
 
     
-    return beta, epoch
+    return beta
 
 
-def SGD_Ada(X, y, degree, n, eps, delta, t0, t1, M):
+def SGD_Ada(X, y, degree, n, t0, t1, M, n_epoch):
 
-    beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
     beta = np.random.randn(degree,1)
     G = np.diag(np.zeros(degree))
+    delta = 1e-7
 
     m = int(n/M)
 
-    training_gradient = grad(CostOLS, 0)
-
-    epoch = 0
-    while(mean_squared_error(beta_linreg, beta)>eps):
+    for epoch in range(n_epoch):
         for i in range(m):
             k = M*np.random.randint(m)
             xi = X[k:k+M]
             yi = y[k:k+M]
-            #gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
-            gradients = training_gradient(beta, n, y, X)
+            gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
 
             G += gradients*gradients
             G_diag = G.diagonal()
@@ -310,31 +300,25 @@ def SGD_Ada(X, y, degree, n, eps, delta, t0, t1, M):
             gamma = eta/(delta + sqrt_G).reshape(-1,1)
 
             beta -= gamma*gradients
-            print(beta[0])
-
-        epoch+=1
 
 
-    return beta, epoch
+    return beta
 
 
-def SGD_RMS(X, y, degree, n, eps, delta, rho, t0, t1, M):
-    beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
+def SGD_RMS(X, y, degree, n, rho, t0, t1, M, n_epoch):
+
     beta = np.random.randn(degree,1)
     G = np.diag(np.zeros(degree))
+    delta = 1e-7
 
     m = int(n/M)
 
-    training_gradient = grad(CostOLS, 0)
-
-    epoch = 0
-    while(mean_squared_error(beta_linreg, beta)>eps):
+    for epoch in range(n_epoch):
         for i in range(m):
             k = M*np.random.randint(m)
             xi = X[k:k+M]
             yi = y[k:k+M]
-            #gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
-            gradients = training_gradient(beta, n, y, X)
+            gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
 
             G = (rho*G+(1-rho)*gradients*gradients)
             G_diag = G.diagonal()
@@ -345,30 +329,25 @@ def SGD_RMS(X, y, degree, n, eps, delta, rho, t0, t1, M):
 
             beta -= gamma*gradients
 
-        epoch += 1
 
-    return beta, epoch
+    return beta
 
 
-def SGD_ADAM(X, y, degree, n, eps, delta, beta1, beta2, t0, t1, M):
-    beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
+def SGD_ADAM(X, y, degree, n, beta1, beta2, t0, t1, M, n_epoch):
     beta = np.random.randn(degree,1)
 
     first_moment = 0.0
     second_moment = 0.0
+    delta = 1e-7
 
     m = int(n/M)
-
-    training_gradient = grad(CostOLS, 0)
     
-    epoch = 0
-    while(mean_squared_error(beta_linreg, beta)>eps):
+    for epoch in range(n_epoch):
         for i in range(m):
             k = M*np.random.randint(m)
             xi = X[k:k+M]
             yi = y[k:k+M]
-            #gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
-            gradients = training_gradient(beta, n, y, X)
+            gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
 
             first_moment = beta1*first_moment + (1-beta1)*gradients
             second_moment = beta2*second_moment+(1-beta2)*gradients*gradients
@@ -379,33 +358,25 @@ def SGD_ADAM(X, y, degree, n, eps, delta, beta1, beta2, t0, t1, M):
             update = eta*first_term/(np.sqrt(second_term)+delta)
 
             beta -= update
-            print(beta[0])
-        
-        epoch += 1
 
 
-    return beta, epoch
+    return beta
 
 
-def SGDM(X, y, degree, n, eps, moment, t0, t1, M):
+def SGDM(X, y, degree, n, moment, t0, t1, M, n_epoch):
 
-    beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
     beta = np.random.randn(degree,1)
 
     change = 0
 
     m = int(n/M)
 
-    training_gradient = grad(CostOLS, 0)
-
-    epoch = 0
-    while(mean_squared_error(beta_linreg, beta)>eps):
+    for epoch in range(n_epoch):
         for i in range(m):
             k = M*np.random.randint(m)
             xi = X[k:k+M]
             yi = y[k:k+M]
-            #gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
-            gradients = training_gradient(beta, n, y, X)
+            gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
 
             eta = learning_schedule(epoch*m+i, t0, t1)
             new_change = eta*gradients + moment * change
@@ -413,32 +384,26 @@ def SGDM(X, y, degree, n, eps, moment, t0, t1, M):
             beta -= new_change
             change = new_change
 
-        epoch += 1
-
     
-    return beta, epoch
+    return beta
 
 
-def SGDM_Ada(X, y, degree, n, eps, delta, moment, t0, t1, M):
+def SGDM_Ada(X, y, degree, n, moment, t0, t1, M, n_epoch):
 
-    beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
     beta = np.random.randn(degree,1)
     G = np.diag(np.zeros(degree))
+    delta = 1e-7
 
     change = 0
 
     m = int(n/M)
 
-    training_gradient = grad(CostOLS, 0)
-
-    epoch = 0
-    while(mean_squared_error(beta_linreg, beta)>eps):
+    for epoch in range(n_epoch):
         for i in range(m):
             k = M*np.random.randint(m)
             xi = X[k:k+M]
             yi = y[k:k+M]
-            #gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
-            gradients = training_gradient(beta, n, y, X)
+            gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
 
             G += gradients*gradients
             G_diag = G.diagonal()
@@ -450,33 +415,27 @@ def SGDM_Ada(X, y, degree, n, eps, delta, moment, t0, t1, M):
 
             beta -= new_change
             change = new_change
-            print(beta[0])
-
-        epoch+=1
 
 
-    return beta, epoch
+    return beta
 
 
-def SGDM_RMS(X, y, degree, n, eps, delta, rho, moment, t0, t1, M):
-    beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
+def SGDM_RMS(X, y, degree, n, rho, moment, t0, t1, M, n_epoch):
+
     beta = np.random.randn(degree,1)
     G = np.diag(np.zeros(degree))
+    delta = 1e-7
 
     change = 0
 
     m = int(n/M)
 
-    training_gradient = grad(CostOLS, 0)
-
-    epoch = 0
-    while(mean_squared_error(beta_Ridge, beta)>eps):
+    for epoch in range(n_epoch):
         for i in range(m):
             k = M*np.random.randint(m)
             xi = X[k:k+M]
             yi = y[k:k+M]
-            #gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
-            gradients = training_gradient(beta, n, y, X)
+            gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
 
             G = (rho*G+(1-rho)*gradients*gradients)
             G_diag = G.diagonal()
@@ -487,35 +446,31 @@ def SGDM_RMS(X, y, degree, n, eps, delta, rho, moment, t0, t1, M):
             new_change = gamma*gradients + moment * change
 
             beta -= new_change
-            print(beta[0])
             change = new_change
 
-        epoch += 1
 
-    return beta, epoch
+    return beta
 
 
-def SGDM_ADAM(X, y, degree, n, eps, delta, beta1, beta2, moment, t0, t1, M):
-    beta_linreg = np.linalg.inv(X.T @ X) @ X.T @ y
+def SGDM_ADAM(X, y, degree, n, beta1, beta2, moment, t0, t1, M, n_epoch):
+
     beta = np.random.randn(degree,1)
 
     first_moment = 0.0
     second_moment = 0.0
+    delta = 1e-7
     
     change = 0
 
     m = int(n/M)
 
-    training_gradient = grad(CostOLS, 0)
-    
-    epoch = 0
-    while(mean_squared_error(beta_linreg, beta)>eps):
+    for epoch in range(n_epoch):
         for i in range(m):
             k = M*np.random.randint(m)
             xi = X[k:k+M]
             yi = y[k:k+M]
-            #gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
-            #gradients = training_gradient(beta, n, y, X)
+            
+            gradients = (2.0/M)* xi.T @ ((xi @ beta)-yi)
 
             first_moment = beta1*first_moment + (1-beta1)*gradients
             second_moment = beta2*second_moment+(1-beta2)*gradients*gradients
@@ -528,11 +483,9 @@ def SGDM_ADAM(X, y, degree, n, eps, delta, beta1, beta2, moment, t0, t1, M):
 
             beta -= new_change
             change = new_change
-        
-        epoch += 1
 
 
-    return beta, epoch
+    return beta
 
 
 def sigmoid(x):
@@ -580,14 +533,16 @@ def initialize_W_and_b(n_features, n_hidden_nodes, n_hidden_layers, n_output_nod
 
     return weigths, biases
 
-def FeedForward(X, W_list, b_list):
+def FeedForward(X, W_list, b_list, activation):
     z_list = []
     a_list = []
 
     z_1 = X @ W_list[0] + b_list[0]
     z_list.append(z_1)
 
-    a_1 = sigmoid(z_1)
+    if(activation == 's'): a_1 = sigmoid(z_1)
+    elif(activation == 'r'): a_1 = RELU(z_1)
+    elif(activation == 'l'): a_1 = leaky_RELU(z_1)
     a_list.append(a_1)
 
     for i in range(len(W_list) - 1):
@@ -596,7 +551,9 @@ def FeedForward(X, W_list, b_list):
 
         if i == len(W_list) - 2: break
 
-        a_i = sigmoid(z_i)
+        if(activation == 's'): a_i = sigmoid(z_i)
+        elif(activation == 'r'): a_i = RELU(z_i)
+        elif(activation == 'l'): a_i = leaky_RELU(z_i)
         a_list.append(a_i)
     
     return z_list, a_list
@@ -607,7 +564,7 @@ def BackPropagation(y_train, X_train, W_list, b_list, a_list, z_list, gamma):
     delta_list.append(delta_out)
 
     for i in range(len(W_list) - 1):
-        delta_i = (delta_list[-1] @ (W_list[-1 - i]).T) * sigmoid_derivative(a_list[-1 - i])
+        delta_i = (delta_list[-1] @ (W_list[-1 - i]).T) * leaky_RELU_derivative(a_list[-1 - i])
         delta_list.append(delta_i)
     
     delta_list.reverse()
@@ -626,30 +583,38 @@ def BackPropagation(y_train, X_train, W_list, b_list, a_list, z_list, gamma):
 import random
 
 # Function for stochastic gradient descent
-def StochasticBackPropagation(y_train, X_train, W_list, b_list, gamma, M, n_epoch):
+def StochasticBackPropagation(y_train, X_train, W_list, b_list, M, n_epoch, t0, t1, activation):
     n = X_train.shape[0]
     m = int(n/M)
 
     for epoch in range(n_epoch):
-        for i in range(m):
-            k = M*np.random.randint(m)
+        for j in range(m):  # Use 'j' instead of 'i' for the inner loop
+            k = M * np.random.randint(m)
             xi = X_train[k:k+M]
             yi = y_train[k:k+M]
 
-            z_list, a_list = FeedForward(xi, W_list, b_list)
+            z_list, a_list = FeedForward(xi, W_list, b_list, activation)
 
             delta_list = []
             delta_out = Costfunction_grad(yi, z_list[-1])
             delta_list.append(delta_out)
 
             for i in range(len(W_list) - 1):
-                delta_i = (delta_list[-1] @ (W_list[-1 - i]).T) * sigmoid_derivative(a_list[-1 - i])
+                if activation == 's':
+                    delta_i = (delta_list[-1] @ (W_list[-1 - i]).T) * sigmoid_derivative(a_list[-1 - i])
+                elif activation == 'r':
+                    delta_i = (delta_list[-1] @ (W_list[-1 - i]).T) * RELU_derivative(a_list[-1 - i])
+                elif activation == 'l':
+                    delta_i = (delta_list[-1] @ (W_list[-1 - i]).T) * leaky_RELU_derivative(a_list[-1 - i])
                 delta_list.append(delta_i)
 
             delta_list.reverse()
 
             # Update weights and biases using the single data point
             x_train_point_T = xi.T  # Transpose x_train_point
+
+            gamma = learning_schedule(epoch * m + j, t0, t1)  # Define learning_schedule
+
             W_list[0] -= gamma * (x_train_point_T @ delta_list[0])
             b_list[0] -= gamma * np.sum(delta_list[0])
 
