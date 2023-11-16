@@ -558,29 +558,7 @@ def FeedForward(X, W_list, b_list, activation):
     
     return z_list, a_list
 
-def BackPropagation(y_train, X_train, W_list, b_list, a_list, z_list, gamma):
-    delta_list = []
-    delta_out = Costfunction_grad(y_train, z_list[-1])
-    delta_list.append(delta_out)
 
-    for i in range(len(W_list) - 1):
-        delta_i = (delta_list[-1] @ (W_list[-1 - i]).T) * leaky_RELU_derivative(a_list[-1 - i])
-        delta_list.append(delta_i)
-    
-    delta_list.reverse()
-
-
-    W_list[0] -= gamma * (X_train.T @ delta_list[0])
-    b_list[0] -= gamma * np.sum(delta_list[0])
-
-    for i in range(len(W_list) - 1):
-        W_list[i + 1] -= gamma * (a_list[i].T @ delta_list[i + 1])
-        b_list[i + 1] -= gamma * np.sum(delta_list[i + 1])
-
-
-    return W_list, b_list
-
-import random
 
 # Function for stochastic gradient descent
 def StochasticBackPropagation(y_train, X_train, W_list, b_list, M, n_epoch, t0, t1, activation):
