@@ -60,7 +60,7 @@ def GD(X, y, degree, n, eps, eta, lmb, auto):
     start_time = time.time()
     while(mean_squared_error(beta_Ridge, beta)>eps):
         if(auto == 1): gradient = training_gradient(beta,lmb, n, y, X)
-        else: gradient = 2/n * X.T @ (X @ beta - y) + lmb * I @ beta
+        else: gradient = 2/n * X.T @ (X @ beta - y) + 2 * lmb * I @ beta
 
         beta -= eta*gradient
 
@@ -600,5 +600,60 @@ def StochasticBackPropagation(y_train, X_train, W_list, b_list, M, n_epoch, t0, 
                 a_list_i_T = a_list[i].T  # Transpose a_list[i]
                 W_list[i + 1] -= gamma * (a_list_i_T @ delta_list[i + 1])
                 b_list[i + 1] -= gamma * np.sum(delta_list[i + 1])
+
+    return W_list, b_list
+
+
+
+def FeedForward_class(X, W_list, b_list):
+    z_list = []
+    a_list = []
+
+    z_1 = X @ W_list[0] + b_list[0]
+    z_list.append(z_1)
+
+    a_1 = sigmoid(z_1)
+    a_list.append(a_1)
+
+    for i in range(len(W_list) - 1):
+        z_i = a_list[i] @ W_list[i+1] + b_list[i+1]
+        z_list.append(z_i)
+
+        a_i = sigmoid(z_i)
+        a_list.append(a_i)
+    
+    return z_list, a_list
+
+
+def StochasticBackPropagation_class(y_train, X_train, W_list, b_list, M, n_epoch, t0, t1):
+    n = X_train.shape[0]
+    m = int(n/M)
+
+    for epoch in range(n_epoch):
+        for j in range(m):  
+            k = M * np.random.randint(m)
+            xi = X_train[k:k+M]
+            yi = y_train[k:k+M].reshape(-1, 1)
+
+            z_list, a_list = FeedForward_class(xi, W_list, b_list)
+
+            delta_list = []
+            delta_out = (yi - a_list[-1]) * sigmoid_derivative(a_list[-1])
+            delta_list.append(delta_out)
+
+            for i in range(len(W_list) - 1):
+                delta_i = (delta_list[-1] @ (W_list[-1 - i]).T) * sigmoid_derivative(a_list[-1 - i])
+                delta_list.append(delta_i)
+
+            delta_list.reverse()
+
+            gamma = learning_schedule(epoch * m + j, t0, t1)
+
+            W_list[0] += gamma * (xi.T @ delta_list[0])
+            b_list[0] += gamma * np.sum(delta_list[0])
+
+            for i in range(len(W_list) - 1):
+                W_list[i + 1] += gamma * (a_list[i].T @ delta_list[i + 1])
+                b_list[i + 1] += gamma * np.sum(delta_list[i + 1])
 
     return W_list, b_list
