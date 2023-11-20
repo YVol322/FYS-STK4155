@@ -132,7 +132,7 @@ def GD(X, y, f, n, eps, eta, lmb, auto):
 
     start_time = time.time() # Starting coutdown.
 
-    # Running loop until MSE is smaller the eps
+    # Running loop until MSE is smaller then eps
     while(mean_squared_error(beta_Ridge, beta)>eps):
 
         # Computing gradients uing auto diff if auto == 1.
@@ -176,7 +176,7 @@ def Ada(X, y, f, n, eps, eta, lmb):
 
     i=0 # Initilising iteration number with zero.
 
-    # Running loop until MSE is smaller the eps
+    # Running loop until MSE is smaller then eps
     while(mean_squared_error(beta_Ridge, beta)>eps):
 
         # Computing gradients uing analyt expression (it is faster then auto diff).
@@ -222,7 +222,7 @@ def RMS(X, y, f, n, eps, eta, rho, lmb):
 
     i=0 # Initilising iteration number with zero.
 
-    # Running loop until MSE is smaller the eps
+    # Running loop until MSE is smaller then eps
     while(mean_squared_error(beta_Ridge, beta)>eps):
 
         # Computing gradients uing analyt expression (it is faster then auto diff).
@@ -271,7 +271,7 @@ def ADAM(X, y, f, n, eps, eta, beta1, beta2, lmb):
 
     i=0 # Initilising iteration number with zero.
 
-    # Running loop until MSE is smaller the eps
+    # Running loop until MSE is smaller then eps
     while(mean_squared_error(beta_Ridge, beta)>eps):
 
         # Computing gradients uing analyt expression (it is faster then auto diff).
@@ -320,7 +320,7 @@ def GD_momentum(X, y, f, n, eps, eta, moment, lmb):
 
     i=0 # Initilising iteration number with zero.
 
-    # Running loop until MSE is smaller the eps
+    # Running loop until MSE is smaller then eps
     while(mean_squared_error(beta_Ridge, beta)>eps):
 
         # Computing gradients uing analyt expression (it is faster then auto diff).
@@ -365,7 +365,7 @@ def Ada_momentum(X, y, f, n, eps, eta, moment):
 
     i=0 # Initilising iteration number with zero.
 
-    # Running loop until MSE is smaller the eps
+    # Running loop until MSE is smaller then eps
     while(mean_squared_error(beta_linreg, beta)>eps):
 
         # Computing gradients uing analyt expression (it is faster then auto diff).
@@ -417,7 +417,7 @@ def RMS_momentum(X, y, f, n, eps, eta, rho, moment):
 
     i=0 # Initilising iteration number with zero.
 
-    # Running loop until MSE is smaller the eps
+    # Running loop until MSE is smaller then eps
     while(mean_squared_error(beta_linreg, beta)>eps):
 
         # Computing gradients uing analyt expression (it is faster then auto diff).
@@ -472,7 +472,7 @@ def ADAM_momentum(X, y, f, n, eps, eta, beta1, beta2, moment):
     
     i=0 # Initilising iteration number with zero.
 
-    # Running loop until MSE is smaller the eps
+    # Running loop until MSE is smaller then eps
     while(mean_squared_error(beta_linreg, beta)>eps):
         
         # Computing gradients uing analyt expression (it is faster then auto diff).
@@ -509,11 +509,10 @@ def ADAM_momentum(X, y, f, n, eps, eta, beta1, beta2, moment):
 #        double t_1 - decreasing learning rate parameter;
 #        int M - mini-batch size;
 #        int n_epoch - number of epochs;
+#        np.array of shape (3, 1) beta - predicted fit coefficients.
 #
 # Output: np.array of shape (3, 1) beta - predicted fit coefficients.
-def SGD(X, y, f, n, t0, t1, M, n_epoch):
-
-    beta = np.random.randn(f,1) # initial guess of fit coefs.
+def SGD(X, y, f, n, t0, t1, M, n_epoch, beta):
 
     m = int(n/M) # number of mini-batches;
 
@@ -539,6 +538,10 @@ def SGD(X, y, f, n, t0, t1, M, n_epoch):
     
     return beta
 
+
+
+
+
 # This function implements AdaGrad Stochastic Gradient Descent algorithm n_epoch iterations.
 #
 # Input: np.array X - design matrix for 2nd order fit.
@@ -549,11 +552,11 @@ def SGD(X, y, f, n, t0, t1, M, n_epoch):
 #        double t_1 - decreasing learning rate parameter;
 #        int M - mini-batch size;
 #        int n_epoch - number of epochs;
+#        np.array of shape (3, 1) beta - predicted fit coefficients.
 #
 # Output: np.array of shape (3, 1) beta - predicted fit coefficients.
-def SGD_Ada(X, y, f, n, t0, t1, M, n_epoch):
+def SGD_Ada(X, y, f, n, t0, t1, M, n_epoch, beta):
 
-    beta = np.random.randn(f,1) # initial guess of fit coefs.
     G = np.diag(np.zeros(f)) # Intilizing G matrix of shape (f,f) with zeros.
     delta = 1e-7 # Small parameter to avoid division by 0 error.
 
@@ -602,11 +605,11 @@ def SGD_Ada(X, y, f, n, t0, t1, M, n_epoch):
 #        double t_1 - decreasing learning rate parameter;
 #        int M - mini-batch size;
 #        int n_epoch - number of epochs;
+#        np.array of shape (3, 1) beta - predicted fit coefficients.
 #
 # Output: np.array of shape (3, 1) beta - predicted fit coefficients.
-def SGD_RMS(X, y, f, n, rho, t0, t1, M, n_epoch):
+def SGD_RMS(X, y, f, n, rho, t0, t1, M, n_epoch, beta):
 
-    beta = np.random.randn(f,1) # initial guess of fit coefs.
     G = np.diag(np.zeros(f)) # Intilizing G matrix of shape (f,f) with zeros.
     delta = 1e-7 # Small parameter to avoid division by 0 error.
 
@@ -656,11 +659,10 @@ def SGD_RMS(X, y, f, n, rho, t0, t1, M, n_epoch):
 #        double t_1 - decreasing learning rate parameter;
 #        int M - mini-batch size;
 #        int n_epoch - number of epochs;
+#        np.array of shape (3, 1) beta - predicted fit coefficients.
 #
 # Output: np.array of shape (3, 1) beta - predicted fit coefficients.
-def SGD_ADAM(X, y, f, n, beta1, beta2, t0, t1, M, n_epoch):
-
-    beta = np.random.randn(f,1) # initial guess of fit coefs.
+def SGD_ADAM(X, y, f, n, beta1, beta2, t0, t1, M, n_epoch, beta):
 
     # Intializing ADAM variables used for update with zeros.
     first_moment = 0.0
@@ -714,11 +716,10 @@ def SGD_ADAM(X, y, f, n, beta1, beta2, t0, t1, M, n_epoch):
 #        double t_1 - decreasing learning rate parameter;
 #        int M - mini-batch size;
 #        int n_epoch - number of epochs;
+#        np.array of shape (3, 1) beta - predicted fit coefficients.
 #
 # Output: np.array of shape (3, 1) beta - predicted fit coefficients.
-def SGDM(X, y, f, n, moment, t0, t1, M, n_epoch):
-
-    beta = np.random.randn(f,1) # initial guess of fit coefs.
+def SGDM(X, y, f, n, moment, t0, t1, M, n_epoch, beta):
 
     change = 0 # Initializing previous iterations update with zero.
 
@@ -765,11 +766,11 @@ def SGDM(X, y, f, n, moment, t0, t1, M, n_epoch):
 #        double t_1 - decreasing learning rate parameter;
 #        int M - mini-batch size;
 #        int n_epoch - number of epochs;
+#        np.array of shape (3, 1) beta - predicted fit coefficients.
 #
 # Output: np.array of shape (3, 1) beta - predicted fit coefficients.
-def SGDM_Ada(X, y, f, n, moment, t0, t1, M, n_epoch):
+def SGDM_Ada(X, y, f, n, moment, t0, t1, M, n_epoch, beta):
 
-    beta = np.random.randn(f,1) # initial guess of fit coefs.
     G = np.diag(np.zeros(f)) # Intilizing G matrix of shape (f,f) with zeros.
     delta = 1e-7 # Small parameter to avoid division by 0 error.
 
@@ -825,11 +826,11 @@ def SGDM_Ada(X, y, f, n, moment, t0, t1, M, n_epoch):
 #        double t_1 - decreasing learning rate parameter;
 #        int M - mini-batch size;
 #        int n_epoch - number of epochs;
+#        np.array of shape (3, 1) beta - predicted fit coefficients.
 #
 # Output: np.array of shape (3, 1) beta - predicted fit coefficients.
-def SGDM_RMS(X, y, f, n, rho, moment, t0, t1, M, n_epoch):
+def SGDM_RMS(X, y, f, n, rho, moment, t0, t1, M, n_epoch, beta):
 
-    beta = np.random.randn(f,1) # initial guess of fit coefs.
     G = np.diag(np.zeros(f)) # Intilizing G matrix of shape (f,f) with zeros.
     delta = 1e-7 # Small parameter to avoid division by 0 error.
 
@@ -886,11 +887,10 @@ def SGDM_RMS(X, y, f, n, rho, moment, t0, t1, M, n_epoch):
 #        double t_1 - decreasing learning rate parameter;
 #        int M - mini-batch size;
 #        int n_epoch - number of epochs;
+#        np.array of shape (3, 1) beta - predicted fit coefficients.
 #
 # Output: np.array of shape (3, 1) beta - predicted fit coefficients.
-def SGDM_ADAM(X, y, f, n, beta1, beta2, moment, t0, t1, M, n_epoch):
-
-    beta = np.random.randn(f,1) # initial guess of fit coefs.
+def SGDM_ADAM(X, y, f, n, beta1, beta2, moment, t0, t1, M, n_epoch, beta):
 
     # Intializing ADAM variables used for update with zeros.
     first_moment = 0.0
